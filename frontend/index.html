@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>InstaConnect - Social Media</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Auth Modal -->
+  <div id="auth-modal" class="modal">
+    <div class="modal-content">
+    <button id="btn-auth-close" class="close-btn">&times;</button>
+      
+      <!-- Login Form -->
+      <div id="login-form" class="auth-form">
+        <h2>Login to InstaConnect</h2>
+        <input id="login-email" type="email" placeholder="Email address" class="auth-input" />
+        <input id="login-password" type="password" placeholder="Password" class="auth-input" />
+        <button id="btn-login" class="auth-btn">Login</button>
+        <p class="auth-toggle">Don't have an account? <a href="#" id="link-switch-register">Sign up</a></p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form" class="auth-form hidden">
+        <h2>Sign up for InstaConnect</h2>
+        <input id="reg-name" type="text" placeholder="Full name" class="auth-input" />
+        <input id="reg-email" type="email" placeholder="Email address" class="auth-input" />
+        <input id="reg-password" type="password" placeholder="Password" class="auth-input" />
+        <button id="btn-register" class="auth-btn">Sign Up</button>
+        <p class="auth-toggle">Have an account? <a href="#" id="link-switch-login">Log in</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Container -->
+  <div id="app" class="app-container hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <h1>InstaConnect</h1>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button id="btn-nav-feed" class="nav-btn active">
+          <span class="icon">🏠</span> Home
+        </button>
+        <button id="btn-nav-profile" class="nav-btn">
+          <span class="icon">👤</span> Profile
+        </button>
+        <button id="btn-nav-followers" class="nav-btn">
+          <span class="icon">👥</span> Followers
+        </button>
+        <button id="btn-nav-following" class="nav-btn">
+          <span class="icon">✓</span> Following
+        </button>
+        <button id="btn-nav-suggestions" class="nav-btn">
+          <span class="icon">🔍</span> Discover
+        </button>
+      </nav>
+
+      <button id="btn-logout" class="logout-btn">Logout</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Explore Section (initially hidden) -->
+      <section id="explore-view" class="view hidden">
+        <h2>Explore</h2>
+      </section>
+
+      <!-- Profile Section -->
+      <section id="profile-view" class="view hidden">
+        <div class="profile-card">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              <span id="profile-avatar-initial">U</span>
+            </div>
+            <div class="profile-info">
+              <h2 id="profile-name">User Name</h2>
+              <p id="profile-email">email@example.com</p>
+              <div class="profile-stats">
+                <div class="stat">
+                  <span id="profile-follower-count">0</span>
+                  <p>Followers</p>
+                </div>
+                <div class="stat">
+                  <span id="profile-following-count">0</span>
+                  <p>Following</p>
+                </div>
+                <div class="stat">
+                  <span id="profile-post-count">0</span>
+                  <p>Posts</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-posts-section">
+            <h3>My Posts</h3>
+            <div id="profile-posts-list" class="posts-grid">Loading posts...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Followers Section -->
+      <section id="followers-view" class="view hidden">
+        <div class="followers-container">
+          <h2>Followers</h2>
+          <div id="followers-list" class="users-list">Loading followers...</div>
+        </div>
+      </section>
+
+      <!-- Following Section -->
+      <section id="following-view" class="view hidden">
+        <div class="following-container">
+          <h2>Following</h2>
+          <div id="following-list" class="users-list">Loading following...</div>
+        </div>
+      </section>
+
+      <!-- Suggestions Section -->
+      <section id="suggestions-view" class="view hidden">
+        <h2>Suggested Users</h2>
+        <div id="suggestions-list" class="users-list">Loading suggestions...</div>
+      </section>
+
+      <!-- Feed Section -->
+      <section id="feed-view" class="view">
+        <!-- Create Post -->
+        <div id="create-post-card" class="create-post-card hidden">
+          <div class="create-post-header">
+            <span id="create-post-avatar" class="avatar-small">U</span>
+            <input id="post-content" type="text" placeholder="What's on your mind?" class="create-input" />
+          </div>
+          <div class="create-post-actions">
+            <button id="btn-create-post" class="post-btn">Post</button>
+          </div>
+        </div>
+
+        <!-- Posts Feed -->
+        <div id="posts-list" class="posts-feed">
+          <p class="loading">Loading posts...</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+      <div class="suggestions-widget">
+        <h3>Suggestions For You</h3>
+        <div id="widget-suggestions" class="widget-users">Loading...</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Post Template -->
+  <template id="post-template">
+    <article class="post">
+      <div class="post-header">
+        <div class="post-author-info">
+          <span class="post-avatar">U</span>
+          <div>
+            <strong class="post-author-name">Author Name</strong>
+            <span class="post-time">just now</span>
+          </div>
+        </div>
+      </div>
+      <div class="post-content"></div>
+      <div class="post-stats">
+        <span class="likes-count">0 likes</span>
+        <span class="comments-count">0 comments</span>
+      </div>
+      <div class="post-actions">
+        <button class="action-btn like-btn">❤️ Like</button>
+        <button class="action-btn comment-btn">💬 Comment</button>
+      </div>
+      <div class="post-comments hidden">
+        <div class="comments-list"></div>
+        <div class="comment-input-area">
+          <input class="comment-input" type="text" placeholder="Add a comment..." />
+          <button class="btn-add-comment">Post</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <!-- User Suggestion Template -->
+  <template id="user-template">
+    <div class="user-card">
+      <div class="user-avatar">U</div>
+      <strong class="user-name">User Name</strong>
+      <p class="user-handle">@username</p>
+      <button class="follow-btn">Follow</button>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
