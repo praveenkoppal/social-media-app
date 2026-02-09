@@ -1,4 +1,5 @@
-const baseURL = window.__API_URL__ || 'http://localhost:3000';
+
+const baseURL = window.__API_URL__ || 'https://vercel.com/praveenkoppal819-gmailcoms-projects/social-media-app';
 const tokenKey = 'sm_auth_token';
 
 let currentUser = null;
