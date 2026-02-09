@@ -1,4 +1,4 @@
-const baseURL = window.__API_URL__ || 'https://vercel.com/praveenkoppal819-gmailcoms-projects/social-media-app';
+const baseURL = window.__API_URL__ || 'https://social-media-app-teal-phi.vercel.app';
 const tokenKey = 'sm_auth_token';
 
 let currentUser = null;
