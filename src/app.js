@@ -19,7 +19,23 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
-app.use(helmet());
+// Configure CSP to allow the frontend origin for API requests. Set FRONTEND_URL
+// in the environment (e.g. https://social-media-app-teal-phi.vercel.app).
+const frontendOrigin = process.env.FRONTEND_URL || 'https://social-media-app-teal-phi.vercel.app';
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			directives: {
+				defaultSrc: ["'self'"],
+				connectSrc: ["'self'", frontendOrigin],
+				scriptSrc: ["'self'"],
+				styleSrc: ["'self'"],
+				imgSrc: ["'self'", 'data:'],
+				objectSrc: ["'none'"],
+			},
+		},
+	})
+);
 app.use(cors());
 
 // Body parsing middleware
