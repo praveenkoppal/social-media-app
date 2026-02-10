@@ -1,7 +1,10 @@
 const { Pool } = require("pg");
+const fs = require("fs");
+const path = require("path");
 const logger = require("./logger");
 
 let pool;
+let schemaInitialized = false;
 
 /**
  * Initialize database connection pool
@@ -40,6 +43,47 @@ const initializePool = () => {
 };
 
 /**
+ * Initialize database schema if tables don't exist
+ */
+const initializeSchema = async () => {
+  if (schemaInitialized) return;
+
+  try {
+    const dbPool = initializePool();
+    const client = await dbPool.connect();
+
+    // Check if users table exists
+    const result = await client.query(
+      `SELECT EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_name = 'users'
+      )`
+    );
+
+    if (!result.rows[0].exists) {
+      logger.verbose("Database schema not found. Initializing...");
+      
+      // Read and execute schema file
+      const schemaSQL = fs.readFileSync(
+        path.join(__dirname, "../../sql/schema.sql"),
+        "utf8"
+      );
+      
+      await client.query(schemaSQL);
+      logger.verbose("Database schema initialized successfully");
+    } else {
+      logger.verbose("Database schema already exists");
+    }
+
+    schemaInitialized = true;
+    client.release();
+  } catch (error) {
+    logger.critical("Failed to initialize database schema", error);
+    throw error;
+  }
+};
+
+/**
  * Connect to the database and test connection
  */
 const connectDB = async () => {
@@ -60,6 +104,9 @@ const connectDB = async () => {
       );
 
       client.release();
+
+      // Initialize schema on first successful connection
+      await initializeSchema();
       return;
     } catch (error) {
       logger.critical(
