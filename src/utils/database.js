@@ -63,14 +63,86 @@ const initializeSchema = async () => {
     if (!result.rows[0].exists) {
       logger.verbose("Database schema not found. Initializing...");
       
-      // Read and execute schema file
-      const schemaSQL = fs.readFileSync(
-        path.join(__dirname, "../../sql/schema.sql"),
-        "utf8"
-      );
-      
-      await client.query(schemaSQL);
-      logger.verbose("Database schema initialized successfully");
+      try {
+        // Try to read schema file
+        const schemaSQL = fs.readFileSync(
+          path.join(__dirname, "../../sql/schema.sql"),
+          "utf8"
+        );
+        
+        // Execute schema with proper error handling
+        await client.query(schemaSQL);
+        logger.verbose("Database schema initialized successfully from file");
+      } catch (fileError) {
+        logger.critical("Failed to read or execute schema file. Using inline schema...", fileError.message);
+        
+        // Fallback: Execute inline schema
+        const inlineSchema = `
+          CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(30) UNIQUE NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            full_name VARCHAR(100) NOT NULL,
+            is_deleted BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TABLE IF NOT EXISTS posts (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            content TEXT NOT NULL,
+            media_url TEXT,
+            comments_enabled BOOLEAN DEFAULT TRUE,
+            is_deleted BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE OR REPLACE FUNCTION update_updated_at_column()
+          RETURNS TRIGGER AS $$ BEGIN NEW.updated_at = CURRENT_TIMESTAMP; RETURN NEW; END; $$ language 'plpgsql';
+
+          CREATE TABLE IF NOT EXISTS likes (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (user_id, post_id)
+          );
+
+          CREATE INDEX IF NOT EXISTS idx_likes_post_id ON likes(post_id);
+          CREATE INDEX IF NOT EXISTS idx_likes_user_id ON likes(user_id);
+
+          CREATE TABLE IF NOT EXISTS comments (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+            parent_comment_id INTEGER REFERENCES comments(id) ON DELETE CASCADE,
+            content TEXT NOT NULL,
+            is_deleted BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
+          CREATE INDEX IF NOT EXISTS idx_comments_user_id ON comments(user_id);
+
+          CREATE TABLE IF NOT EXISTS follows (
+            id SERIAL PRIMARY KEY,
+            follower_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            followee_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (follower_id, followee_id)
+          );
+
+          CREATE INDEX IF NOT EXISTS idx_follows_follower_id ON follows(follower_id);
+          CREATE INDEX IF NOT EXISTS idx_follows_followee_id ON follows(followee_id);
+        `;
+        
+        await client.query(inlineSchema);
+        logger.verbose("Database schema initialized successfully from inline script");
+      }
     } else {
       logger.verbose("Database schema already exists");
     }
