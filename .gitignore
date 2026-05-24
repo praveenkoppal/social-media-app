@@ -1,0 +1,5 @@
+#.gitignore for workspace root
+.env
+node_modules/
+npm-debug.log*
+.vscode/

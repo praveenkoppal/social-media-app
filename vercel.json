@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "social-media-app-main/src/app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "social-media-app-main/src/app.js"
+    }
+  ],
+  "env": {
+      "NODE_ENV": "production"
+  }
+}
